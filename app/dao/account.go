@@ -18,7 +18,7 @@ type (
 	}
 )
 
-// Create accout repository
+// Create account repository
 func NewAccount(db *sqlx.DB) repository.Account {
 	return &account{db: db}
 }
@@ -36,4 +36,13 @@ func (r *account) FindByUsername(ctx context.Context, username string) (*object.
 	}
 
 	return entity, nil
+}
+
+func (r *account) CreateUser(ctx context.Context, a *object.Account) error {
+	query := "INSERT INTO account (username, password_hash, display_name, avatar, header, note) VALUES (?, ?, ?, NULL, NULL, NULL)"
+	_, err := r.db.Exec(query, a.Username, a.PasswordHash, a.Username)
+	if err != nil {
+		return fmt.Errorf("failed to register new account to db: %w", err)
+	}
+	return nil
 }
