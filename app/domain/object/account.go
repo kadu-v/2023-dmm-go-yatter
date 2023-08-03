@@ -16,7 +16,7 @@ type Account struct {
 	ID int64 `json:"id,omitempty"`
 
 	// The username of the account
-	Username string `json:"username,omitempty"`
+	Username string `json:"username,omitempty" db:"username"`
 
 	// The username of the account
 	PasswordHash string `json:"-" db:"password_hash"`

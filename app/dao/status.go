@@ -41,25 +41,56 @@ func (r *status) AddStatus(ctx context.Context, a *object.Account, s *object.Sta
 
 // FindStatusByID: 対応するIDのstatusを取得
 func (r *status) FindStatusByID(ctx context.Context, id int64) (*object.Status, error) {
-	status := new(object.Status)
-	var accountID int64
-	query := "SELECT id, account_id, content, create_at FROM status WHERE id = ?"
-	if err := r.db.QueryRowxContext(ctx, query, id).Scan(&status.ID, &accountID, &status.Content, &status.CreateAt); err != nil {
+	entity := new(object.Status)
+	query := `
+		SELECT
+			s.id,
+			s.content,
+			s.create_at,
+			a.id AS "account.id",
+			a.username AS "account.username",
+			a.display_name AS "account.display_name"
+		FROM status s
+		JOIN account a 
+		ON s.account_id = a.id
+		WHERE s.id = ?;`
+	if err := r.db.QueryRowxContext(ctx, query, id).StructScan(entity); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to find status from db: %w", err)
 	}
+	return entity, nil
+}
 
-	account := new(object.Account)
-	if err := r.db.QueryRowxContext(ctx, "SELECT * FROM account WHERE id = ?", accountID).StructScan(account); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
-		}
+// Question: DB操作でトランザクションはどのように使えば良いのか？
+// Question: アカウントのテーブルを検索するけど，本来はaccount.goにこの処理を書くべきでは？
+// 今回のインターン課題だとどこ？
+// Question:
+// FindStatusesByRange: sinceIDからmaxIDまでのstatusを取得する
+func (r *status) FindStatusesByRange(ctx context.Context, sinceID int64, maxID int64, limit int64) (*object.Timeline, error) {
+	query := `
+		SELECT
+			s.id,
+			s.content,
+			s.create_at,
+			a.id AS "account.id",
+			a.username AS "account.username",
+			a.display_name AS "account.display_name"
+		FROM status s
+		JOIN account a 
+		ON s.account_id = a.id
+		WHERE ? <= s.id AND s.id <= ? 
+		ORDER BY s.id ASC LIMIT ?;`
 
-		return nil, fmt.Errorf("failed to find account from db: %w", err)
+	var entities []*object.Status
+	err := r.db.SelectContext(ctx, &entities, query, sinceID, maxID, limit)
+	if err != nil {
+		err = fmt.Errorf("failed to find statuses from since_id \"%d\" to max_id \"%d\" with limit \"%d\": %w", sinceID, maxID, limit, err)
+		return nil, err
 	}
-	status.Account = account
 
-	return status, nil
+	timeline := new(object.Timeline)
+	timeline.Statuses = entities
+	return timeline, nil
 }
