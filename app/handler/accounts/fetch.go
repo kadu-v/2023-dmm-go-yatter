@@ -23,7 +23,7 @@ func (h *handler) Fetch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Qustion: ユーザーが見つからない状況はエラーなのか．それともnullを返してしまっていいのか？
+	// Qusetion: ユーザーが見つからない状況はエラーなのか．それともnullを返してしまっていいのか？
 	account, err := h.ar.FindByUsername(ctx, username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
