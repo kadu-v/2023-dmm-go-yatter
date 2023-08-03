@@ -8,9 +8,10 @@ import (
 )
 
 type QueryParams struct {
-	SinceID int64
-	MaxID   int64
-	Limit   int64
+	MediaOnly bool
+	SinceID   int64
+	MaxID     int64
+	Limit     int64
 }
 
 func (h *handler) FetchPublicTimeline(w http.ResponseWriter, r *http.Request) {
@@ -35,6 +36,20 @@ func (h *handler) FetchPublicTimeline(w http.ResponseWriter, r *http.Request) {
 }
 
 func queryParamsParser(r *http.Request) (*QueryParams, error) {
+	booleanParamParserWithDefualt := func(paramKey string, dflt bool) (bool, error) {
+		paramValue := r.FormValue(paramKey)
+		if paramValue == "" {
+			return dflt, nil
+		}
+
+		v, err := strconv.ParseBool(paramValue)
+		if err != nil {
+			return false, fmt.Errorf("Invalid query parameter for %s: %s", paramKey, err)
+		}
+
+		return v, nil
+	}
+
 	integerParamParserWithDefualt := func(paramKey string, dflt int64) (int64, error) {
 		paramValue := r.FormValue(paramKey)
 		if paramValue == "" {
@@ -47,6 +62,11 @@ func queryParamsParser(r *http.Request) (*QueryParams, error) {
 		}
 
 		return v, nil
+	}
+
+	mediaOnly, err := booleanParamParserWithDefualt("media_only", false)
+	if err != nil {
+		return nil, err
 	}
 
 	limit, err := integerParamParserWithDefualt("limit", 40)
@@ -64,5 +84,5 @@ func queryParamsParser(r *http.Request) (*QueryParams, error) {
 		return nil, err
 	}
 
-	return &QueryParams{SinceID: sinceID, MaxID: maxID, Limit: limit}, nil
+	return &QueryParams{MediaOnly: mediaOnly, SinceID: sinceID, MaxID: maxID, Limit: limit}, nil
 }
