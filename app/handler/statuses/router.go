@@ -22,6 +22,8 @@ func NewRouter(ar repository.Account, sr repository.Status) http.Handler {
 		r.Use(auth.Middleware(ar))
 		r.Post("/", h.PostStatus)
 	})
+
+	// 対応するidのstatusの取得
 	r.Get("/{id}", h.FetchStatusByID)
 	return r
 }
