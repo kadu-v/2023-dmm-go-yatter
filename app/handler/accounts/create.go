@@ -50,7 +50,7 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: avator, header, note, created_atを埋めるべき
 	// dbへ新規アカウントを登録
-	if err := h.ar.CreateUser(ctx, account); err != nil {
+	if err := h.ar.AddAccount(ctx, account); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
