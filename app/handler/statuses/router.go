@@ -18,10 +18,7 @@ func NewRouter(ar repository.Account, sr repository.Status) http.Handler {
 	h := &handler{sr}
 
 	// Statusのポスト
-	r.Route("/", func(r chi.Router) {
-		r.Use(auth.Middleware(ar))
-		r.Post("/", h.PostStatus)
-	})
+	r.With(auth.Middleware(ar)).Post("/", h.PostStatus)
 
 	// 対応するidのstatusの取得
 	r.Get("/{id}", h.FetchStatusByID)
