@@ -19,7 +19,7 @@ func (h *handler) FetchStatusByID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("empty id is invalid to find a status"), http.StatusBadRequest)
 		return
 	}
-	id, err := strconv.ParseInt(ids /* base */, 10 /* bitSize */, 64)
+	id, err := strconv.ParseInt(ids, 10 /* base */, 64 /* bitSize */)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
