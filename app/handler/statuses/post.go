@@ -21,7 +21,7 @@ func (h *handler) PostStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Status objectの各フィールドの初期化
+	// Status objectの各フィールドを初期化
 	status := new(object.Status)
 	account := auth.AccountOf(r)
 	status.Account = account
