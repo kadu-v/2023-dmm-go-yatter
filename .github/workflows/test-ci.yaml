@@ -1,0 +1,13 @@
+name: test
+
+on: push
+
+jobs:
+  gotest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: test
+        run: |
+          docker compose up -d --remove-orphans
+          docker compose exec -T web make test
