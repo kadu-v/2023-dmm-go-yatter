@@ -3,11 +3,21 @@ name: test
 on: push
 
 jobs:
-  gotest:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: test
+      - name: Checkout and Build
+        env:
+          MYSQL_DATABASE: yatter
+          MYSQL_USER: yatter
+          MYSQL_PASSWORD: yatter
+          MYSQL_HOST: "mysql:3306"
         run: |
-          docker compose up -d --remove-orphans
-          docker compose exec -T web make test
+          docker compose up -d
+
+      - name: Check
+        run: docker container ls -a
+
+      - name: Test
+        run: docker compose exec -T web make test
