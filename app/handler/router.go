@@ -7,13 +7,17 @@ import (
 	"yatter-backend-go/app/domain/repository"
 	"yatter-backend-go/app/handler/accounts"
 	"yatter-backend-go/app/handler/health"
+	"yatter-backend-go/app/handler/statuses"
+	"yatter-backend-go/app/handler/timelines"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 )
 
-func NewRouter(ar repository.Account) http.Handler {
+// Question: repositoryが増えてゆくとここの引数も増えてゆくが，それで良いのか？
+// それともcontextで渡したほうがいいのか？　業務的にはどちらを選択するのか？
+func NewRouter(ar repository.Account, sr repository.Status) http.Handler {
 	r := chi.NewRouter()
 
 	// A good base middleware stack
@@ -29,8 +33,9 @@ func NewRouter(ar repository.Account) http.Handler {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Mount("/v1/accounts", accounts.NewRouter(ar))
+	r.Mount("/v1/statuses", statuses.NewRouter(ar, sr))
+	r.Mount("/v1/timelines", timelines.NewRouter(sr))
 	r.Mount("/v1/health", health.NewRouter())
-
 	return r
 }
 

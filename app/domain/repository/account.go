@@ -9,5 +9,6 @@ import (
 type Account interface {
 	// Fetch account which has specified username
 	FindByUsername(ctx context.Context, username string) (*object.Account, error)
-	// TODO: Add Other APIs
+	// Create new account
+	AddAccount(ctx context.Context, a *object.Account) error
 }
